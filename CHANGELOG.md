@@ -3,5 +3,7 @@
 # PyProjectHub Changelog
 
 ## [Unreleased]
+
 ### Added
-- Initial scaffold created from [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)
+
+- Initial plugin skeleton for PyCharm 2025.3 and later, with build, verification and release automation. No user-facing features yet.
