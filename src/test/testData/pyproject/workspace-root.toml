@@ -1,0 +1,13 @@
+[project]
+name = "monorepo"
+version = "0.1.0"
+dependencies = ["core", "cli"]
+
+[tool.uv.workspace]
+members = ["packages/*", "apps/cli/"]
+exclude = ["packages/legacy"]
+
+[tool.uv.sources]
+core = { workspace = true }
+cli = { workspace = true }
+requests = { git = "https://example.com/requests.git" }

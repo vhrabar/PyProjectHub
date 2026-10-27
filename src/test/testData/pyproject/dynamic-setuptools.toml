@@ -1,0 +1,7 @@
+[project]
+name = "dyn"
+dynamic = ["version"]
+license = { text = "Apache-2.0\nLong license text follows" }
+
+[build-system]
+build-backend = "setuptools.build_meta"
