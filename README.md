@@ -14,6 +14,9 @@ This plugin is in early development and does not provide any features yet.
 PyProjectHub is not affiliated with Astral or JetBrains.
 <!-- Plugin description end -->
 
+## LLM Usage Disclaimer
+- Plugin icons were created using Claude Design tool powered by the Opus 5.5 model
+
 ## License
 
 This project is licensed under the Apache License v2 - see the [LICENSE](LICENSE) file for details.
