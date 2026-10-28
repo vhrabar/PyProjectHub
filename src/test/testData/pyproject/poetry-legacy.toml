@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "legacy-scraper"
+version = "0.9.2"
+description = "Scrapes things"
+authors = ["Blackwell <blackwell@example.com>"]
+license = "BSD-3-Clause"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+requests = "^2.31"
+lxml = { version = ">=5", optional = true }
+click = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
