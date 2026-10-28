@@ -7,3 +7,8 @@ profile:
   name: qodana.recommended
 
 failThreshold: 0
+
+exclude:
+  - name: All
+    paths:
+      - src/test/testData

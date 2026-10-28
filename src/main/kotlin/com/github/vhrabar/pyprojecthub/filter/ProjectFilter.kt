@@ -136,7 +136,7 @@ object ProjectFilter {
             addAll(project.allDependencies.map(::requirementName))
         }.joinToString("\n").lowercase()
 
-    /** "requests[socks]>=2.0 ; python_version<'3.12'" -> "requests" */
+    /** `"requests[socks]>=2.0 ; python_version<'3.12'"` -> `"requests"` */
     fun requirementName(requirement: String): String = requirement.trim().takeWhile { it.isLetterOrDigit() || it in "._-" }
 
     private fun comparator(

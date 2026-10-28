@@ -7,4 +7,24 @@
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.python</depends>
+
+    <resource-bundle>messages.PyProjectHubBundle</resource-bundle>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationConfigurable
+            id="com.github.vhrabar.pyprojecthub.settings"
+            parentId="tools"
+            instance="com.github.vhrabar.pyprojecthub.settings.PyProjectHubConfigurable"
+            key="settings.displayName"/>
+    </extensions>
+
+    <actions resource-bundle="messages.PyProjectHubBundle">
+        <action
+            id="PyProjectHub.OpenBrowser"
+            class="com.github.vhrabar.pyprojecthub.ui.OpenProjectBrowserAction"
+            icon="/icons/pyProjectHub.svg">
+            <add-to-group group-id="WelcomeScreen.QuickStart" anchor="last"/>
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
 </idea-plugin>

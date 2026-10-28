@@ -43,7 +43,7 @@ data class ScanOptions(
 /**
  * Finds every folder holding a `pyproject.toml` below the given roots and groups uv workspace
  * members under their workspace root. Plain `java.nio`, so it runs on any background thread and
- * in unit tests; [isCancelled] is polled once per visited folder.
+ * in unit tests; [scan]'s `isCancelled` is polled once per visited folder.
  */
 class ProjectScanner(
     private val options: ScanOptions = ScanOptions(),
@@ -130,8 +130,7 @@ class ProjectScanner(
 
     private fun isExcluded(dir: Path): Boolean {
         val name = dir.fileName ?: return false
-        if (options.skipHidden && name.toString().startsWith('.')) return true
-        return excludeMatchers.any { it.matches(name) }
+        return (options.skipHidden && name.toString().startsWith('.')) || excludeMatchers.any { it.matches(name) }
     }
 
     private companion object {

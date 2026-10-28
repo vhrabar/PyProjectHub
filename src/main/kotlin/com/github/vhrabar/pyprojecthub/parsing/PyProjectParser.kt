@@ -45,7 +45,7 @@ class PyProjectParser {
 
         val name = project?.string("name") ?: poetry?.string("name")
         val version = project?.string("version") ?: poetry?.string("version")
-        if (project != null && project.value("name") != null && project.string("name") == null) {
+        if (project?.value("name") != null && project.string("name") == null) {
             problems += "[project].name is not a string"
         }
 
