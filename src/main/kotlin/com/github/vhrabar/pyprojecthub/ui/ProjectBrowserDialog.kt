@@ -402,6 +402,9 @@ class ProjectBrowserDialog(
     @get:TestOnly
     internal val searchForTests: SearchTextField get() = search
 
+    @get:TestOnly
+    internal val pythonVersionsForTests: List<String?> get() = (0 until pythonCombo.itemCount).map(pythonCombo::getItemAt)
+
     override fun dispose() {
         cancelScan()
         if (scanResult != null || settings.scanRoots().isEmpty()) settings.criteria = criteria()

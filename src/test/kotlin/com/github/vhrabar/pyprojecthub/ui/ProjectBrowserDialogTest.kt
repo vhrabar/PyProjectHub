@@ -100,6 +100,13 @@ class ProjectBrowserDialogTest : BasePlatformTestCase() {
         assertFalse(dialog.isOpenMemberEnabledForTests)
     }
 
+    fun testPythonFilterOffersDeclaredVersionsAfterScan() {
+        awaitScan()
+
+        // Only member core declares requires-python (>=3.12)
+        assertEquals(listOf(null, "3.12"), dialog.pythonVersionsForTests)
+    }
+
     fun testSearchFiltersTheTree() {
         awaitScan()
 
