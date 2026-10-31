@@ -66,7 +66,7 @@ class ProjectBrowserDialog(
 
     private val search = SearchTextField(false)
     private val toolCombo = ComboBox(arrayOf<PythonTool?>(null) + PythonTool.entries)
-    private val pythonCombo = ComboBox(arrayOf<String?>(null) + ProjectFilter.PYTHON_VERSIONS)
+    private val pythonCombo = ComboBox(arrayOf<String?>(null) + ProjectFilter.pythonVersions(emptyList(), settings.criteria.python))
     private val sortCombo = ComboBox(SortOrder.entries.toTypedArray())
     private val groupCheck = JBCheckBox(PyProjectHubBundle["browser.filter.group"])
 
