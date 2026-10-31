@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Project folders starting with `~\` now expand to home folder, in the same manner as a `~/` already did.
+
 ## [0.0.1] - 2026-10-28
 
 ### Added

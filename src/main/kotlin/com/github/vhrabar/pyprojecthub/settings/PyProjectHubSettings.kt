@@ -91,12 +91,20 @@ class PyProjectHubSettings : PersistentStateComponent<PyProjectHubSettings.State
         val defaultRoot: Path? =
             toPath("~/PycharmProjects")?.takeIf { Files.isDirectory(it) }
 
+        /**
+         * Parses a folder from settings, expanding a leading `~`, `~/` or `~\` to the user's home folder.
+         * Both separators are accepted on every OS so settings typed on Windows keep working elsewhere.
+         */
         fun toPath(text: String): Path? {
             val trimmed = text.trim()
             if (trimmed.isEmpty()) return null
-            val expanded = if (trimmed == "~" || trimmed.startsWith("~/")) System.getProperty("user.home") + trimmed.drop(1) else trimmed
+            val home = System.getProperty("user.home")
             return try {
-                Path.of(expanded)
+                when {
+                    trimmed == "~" -> Path.of(home)
+                    trimmed.startsWith("~/") || trimmed.startsWith("~\\") -> Path.of(home, trimmed.drop(2))
+                    else -> Path.of(trimmed)
+                }
             } catch (_: InvalidPathException) {
                 null
             }
