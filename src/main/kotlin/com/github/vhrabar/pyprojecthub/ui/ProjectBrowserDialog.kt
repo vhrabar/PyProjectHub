@@ -46,6 +46,7 @@ import java.nio.file.Path
 import java.util.concurrent.Future
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.Action
+import javax.swing.DefaultComboBoxModel
 import javax.swing.JComponent
 import javax.swing.JEditorPane
 import javax.swing.JList
@@ -240,6 +241,7 @@ class ProjectBrowserDialog(
         outcome
             .onSuccess { result ->
                 scanResult = result
+                refreshPythonVersions(result)
                 rebuildTree()
             }.onFailure { error ->
                 thisLogger().warn("PyProjectHub scan failed", error)
@@ -247,6 +249,15 @@ class ProjectBrowserDialog(
                 treeModel.setRoot(DefaultMutableTreeNode())
                 status.text = PyProjectHubBundle.message("browser.status.failed", error.message ?: error.javaClass.simpleName)
             }
+    }
+
+    /** Offers the Python versions the scanned projects declare, keeping the current choice selected. */
+    private fun refreshPythonVersions(result: ScanResult) {
+        val selected = pythonCombo.item
+        restoringState = true
+        pythonCombo.model = DefaultComboBoxModel(arrayOf<String?>(null) + ProjectFilter.pythonVersions(result.entries, selected))
+        pythonCombo.item = selected
+        restoringState = false
     }
 
     // endregion

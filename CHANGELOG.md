@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- The **Python** filter lists the versions your projects declare in `requires-python` and Python version classifiers, instead of a fixed 3.9–3.14 list.
+
 ### Fixed
 
 - Project folders starting with `~\` now expand to home folder, in the same manner as a `~/` already did.
