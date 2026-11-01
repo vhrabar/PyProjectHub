@@ -87,16 +87,34 @@ class PyProjectHubSettings : PersistentStateComponent<PyProjectHubSettings.State
 
         fun getInstance(): PyProjectHubSettings = service()
 
-        /** Folder suggested on first use, when it exists: PyCharm's default location for new projects. */
-        val defaultRoot: Path? =
-            toPath("~/PycharmProjects")?.takeIf { Files.isDirectory(it) }
+        /** Folders below the home folder where projects commonly live, PyCharm's default location first. */
+        val SUGGESTED_ROOT_NAMES = listOf("PycharmProjects", "Projects", "projects", "src", "code", "dev", "repos")
 
+        /**
+         * The [SUGGESTED_ROOT_NAMES] that exist below [home], offered on first use. Checked on every call, so
+         * folders created later show up. `Projects` and `projects` are the same folder on case-insensitive
+         * file systems and are offered once.
+         */
+        fun suggestedRoots(home: Path = Path.of(System.getProperty("user.home"))): List<Path> =
+            SUGGESTED_ROOT_NAMES
+                .map(home::resolve)
+                .filter { Files.isDirectory(it) }
+                .distinctBy { runCatching { it.toRealPath() }.getOrDefault(it) }
+
+        /**
+         * Parses a folder from settings, expanding a leading `~`, `~/` or `~\` to the user's home folder.
+         * Both separators are accepted on every OS so settings typed on Windows keep working elsewhere.
+         */
         fun toPath(text: String): Path? {
             val trimmed = text.trim()
             if (trimmed.isEmpty()) return null
-            val expanded = if (trimmed == "~" || trimmed.startsWith("~/")) System.getProperty("user.home") + trimmed.drop(1) else trimmed
+            val home = System.getProperty("user.home")
             return try {
-                Path.of(expanded)
+                when {
+                    trimmed == "~" -> Path.of(home)
+                    trimmed.startsWith("~/") || trimmed.startsWith("~\\") -> Path.of(home, trimmed.drop(2))
+                    else -> Path.of(trimmed)
+                }
             } catch (_: InvalidPathException) {
                 null
             }

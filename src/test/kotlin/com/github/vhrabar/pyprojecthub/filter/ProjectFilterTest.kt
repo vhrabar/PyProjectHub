@@ -101,6 +101,45 @@ class ProjectFilterTest {
             ),
         )
 
+    private fun versions(vararg minors: Int) = minors.map { "3.$it" }
+
+    @Test
+    fun pythonVersionsSpanDeclaredRangeIncludingWorkspaceMembers() =
+        // scraper ^3.9, member cli >=3.10, member core >=3.12
+        assertEquals(versions(9, 10, 11, 12), ProjectFilter.pythonVersions(entries))
+
+    @Test
+    fun pythonVersionsAreEmptyWhenNothingIsDeclared() =
+        assertEquals(emptyList<String>(), ProjectFilter.pythonVersions(listOf(StandaloneProject(project("bare")))))
+
+    @Test
+    fun pythonVersionsUseClassifiers() {
+        val classified =
+            project("lib", python = ">=3.10").copy(
+                classifiers =
+                    listOf(
+                        "Programming Language :: Python :: 3",
+                        "Programming Language :: Python :: 3 :: Only",
+                        "Programming Language :: Python :: 3.14",
+                        "License :: OSI Approved :: MIT License",
+                    ),
+            )
+        assertEquals(versions(10, 11, 12, 13, 14), ProjectFilter.pythonVersions(listOf(StandaloneProject(classified))))
+    }
+
+    @Test
+    fun pythonVersionsReadEveryBoundAndIgnoreMicroVersions() {
+        val bounded = StandaloneProject(project("lib", python = ">=3.10.12, !=3.11.*, <3.13"))
+        assertEquals(versions(10, 11, 12, 13), ProjectFilter.pythonVersions(listOf(bounded)))
+    }
+
+    @Test
+    fun pythonVersionsKeepTheSavedSelection() {
+        assertEquals(versions(9, 10, 11, 12, 13, 14), ProjectFilter.pythonVersions(entries, "3.14"))
+        assertEquals(versions(12), ProjectFilter.pythonVersions(emptyList(), "3.12"))
+        assertEquals(versions(9, 10, 11, 12) + "pypy", ProjectFilter.pythonVersions(entries, "pypy"))
+    }
+
     @Test
     fun requirementNames() {
         assertEquals("requests", ProjectFilter.requirementName("requests[socks]>=2 ; python_version<'3.12'"))

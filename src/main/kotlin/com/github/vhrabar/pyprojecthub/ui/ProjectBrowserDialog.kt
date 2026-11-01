@@ -46,6 +46,7 @@ import java.nio.file.Path
 import java.util.concurrent.Future
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.Action
+import javax.swing.DefaultComboBoxModel
 import javax.swing.JComponent
 import javax.swing.JEditorPane
 import javax.swing.JList
@@ -66,7 +67,7 @@ class ProjectBrowserDialog(
 
     private val search = SearchTextField(false)
     private val toolCombo = ComboBox(arrayOf<PythonTool?>(null) + PythonTool.entries)
-    private val pythonCombo = ComboBox(arrayOf<String?>(null) + ProjectFilter.PYTHON_VERSIONS)
+    private val pythonCombo = ComboBox(arrayOf<String?>(null) + ProjectFilter.pythonVersions(emptyList(), settings.criteria.python))
     private val sortCombo = ComboBox(SortOrder.entries.toTypedArray())
     private val groupCheck = JBCheckBox(PyProjectHubBundle["browser.filter.group"])
 
@@ -80,6 +81,9 @@ class ProjectBrowserDialog(
     private var scanFuture: Future<*>? = null
     private var scanCancelled = AtomicBoolean(false)
     private var restoringState = false
+
+    /** Folders offered as links while no folders are configured. */
+    private var offeredRoots: List<Path> = emptyList()
 
     private val openMemberAction =
         object : DialogWrapperAction(PyProjectHubBundle["browser.open.member"]) {
@@ -240,6 +244,7 @@ class ProjectBrowserDialog(
         outcome
             .onSuccess { result ->
                 scanResult = result
+                refreshPythonVersions(result)
                 rebuildTree()
             }.onFailure { error ->
                 thisLogger().warn("PyProjectHub scan failed", error)
@@ -247,6 +252,15 @@ class ProjectBrowserDialog(
                 treeModel.setRoot(DefaultMutableTreeNode())
                 status.text = PyProjectHubBundle.message("browser.status.failed", error.message ?: error.javaClass.simpleName)
             }
+    }
+
+    /** Offers the Python versions the scanned projects declare, keeping the current choice selected. */
+    private fun refreshPythonVersions(result: ScanResult) {
+        val selected = pythonCombo.item
+        restoringState = true
+        pythonCombo.model = DefaultComboBoxModel(arrayOf<String?>(null) + ProjectFilter.pythonVersions(result.entries, selected))
+        pythonCombo.item = selected
+        restoringState = false
     }
 
     // endregion
@@ -312,19 +326,22 @@ class ProjectBrowserDialog(
         status.text = ""
         tree.emptyText.clear()
         tree.emptyText.text = PyProjectHubBundle["browser.empty.noRoots"]
-        PyProjectHubSettings.defaultRoot?.let { default ->
+        offeredRoots = PyProjectHubSettings.suggestedRoots()
+        for (suggested in offeredRoots) {
             tree.emptyText.appendLine(
-                PyProjectHubBundle.message("browser.empty.addDefault", FileUtil.getLocationRelativeToUserHome(default.toString())),
+                PyProjectHubBundle.message("browser.empty.addDefault", FileUtil.getLocationRelativeToUserHome(suggested.toString())),
                 SimpleTextAttributes.LINK_PLAIN_ATTRIBUTES,
-            ) {
-                settings.state.roots.add(default.toString())
-                startScan()
-            }
+            ) { addRoot(suggested) }
         }
         tree.emptyText.appendLine(PyProjectHubBundle["browser.empty.configure"], SimpleTextAttributes.LINK_PLAIN_ATTRIBUTES) {
             openSettings()
         }
         updateSelectionDependentState()
+    }
+
+    private fun addRoot(root: Path) {
+        settings.state.roots.add(root.toString())
+        startScan()
     }
 
     private fun openSettings() {
@@ -390,6 +407,16 @@ class ProjectBrowserDialog(
 
     @get:TestOnly
     internal val searchForTests: SearchTextField get() = search
+
+    @get:TestOnly
+    internal val offeredRootsForTests: List<Path> get() = offeredRoots
+
+    /** Does what clicking an offered folder's link does. */
+    @TestOnly
+    internal fun addOfferedRootForTests(root: Path) = addRoot(root)
+
+    @get:TestOnly
+    internal val pythonVersionsForTests: List<String?> get() = (0 until pythonCombo.itemCount).map(pythonCombo::getItemAt)
 
     override fun dispose() {
         cancelScan()
