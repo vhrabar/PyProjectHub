@@ -323,12 +323,12 @@ class ProjectBrowserDialog(
         status.text = ""
         tree.emptyText.clear()
         tree.emptyText.text = PyProjectHubBundle["browser.empty.noRoots"]
-        PyProjectHubSettings.defaultRoot?.let { default ->
+        for (suggested in PyProjectHubSettings.suggestedRoots()) {
             tree.emptyText.appendLine(
-                PyProjectHubBundle.message("browser.empty.addDefault", FileUtil.getLocationRelativeToUserHome(default.toString())),
+                PyProjectHubBundle.message("browser.empty.addDefault", FileUtil.getLocationRelativeToUserHome(suggested.toString())),
                 SimpleTextAttributes.LINK_PLAIN_ATTRIBUTES,
             ) {
-                settings.state.roots.add(default.toString())
+                settings.state.roots.add(suggested.toString())
                 startScan()
             }
         }

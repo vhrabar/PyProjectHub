@@ -87,9 +87,19 @@ class PyProjectHubSettings : PersistentStateComponent<PyProjectHubSettings.State
 
         fun getInstance(): PyProjectHubSettings = service()
 
-        /** Folder suggested on first use, when it exists: PyCharm's default location for new projects. */
-        val defaultRoot: Path? =
-            toPath("~/PycharmProjects")?.takeIf { Files.isDirectory(it) }
+        /** Folders below the home folder where projects commonly live, PyCharm's default location first. */
+        val SUGGESTED_ROOT_NAMES = listOf("PycharmProjects", "Projects", "projects", "src", "code", "dev", "repos")
+
+        /**
+         * The [SUGGESTED_ROOT_NAMES] that exist below [home], offered on first use. Checked on every call, so
+         * folders created later show up. `Projects` and `projects` are the same folder on case-insensitive
+         * file systems and are offered once.
+         */
+        fun suggestedRoots(home: Path = Path.of(System.getProperty("user.home"))): List<Path> =
+            SUGGESTED_ROOT_NAMES
+                .map(home::resolve)
+                .filter { Files.isDirectory(it) }
+                .distinctBy { runCatching { it.toRealPath() }.getOrDefault(it) }
 
         /**
          * Parses a folder from settings, expanding a leading `~`, `~/` or `~\` to the user's home folder.

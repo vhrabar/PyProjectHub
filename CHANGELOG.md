@@ -6,6 +6,7 @@
 
 ### Changed
 
+- On first use, the browser offers every common project folder in your home folder that exists (`PycharmProjects`, `Projects`, `projects`, `src`, `code`, `dev`, `repos`), not just `~/PycharmProjects`.
 - The **Python** filter lists the versions your projects declare in `requires-python` and Python version classifiers, instead of a fixed 3.9–3.14 list.
 
 ### Fixed
