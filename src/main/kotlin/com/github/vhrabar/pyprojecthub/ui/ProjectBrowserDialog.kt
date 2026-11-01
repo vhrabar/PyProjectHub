@@ -82,6 +82,9 @@ class ProjectBrowserDialog(
     private var scanCancelled = AtomicBoolean(false)
     private var restoringState = false
 
+    /** Folders offered as links while no folders are configured. */
+    private var offeredRoots: List<Path> = emptyList()
+
     private val openMemberAction =
         object : DialogWrapperAction(PyProjectHubBundle["browser.open.member"]) {
             override fun doAction(e: ActionEvent) = openSelected(memberAlone = true)
@@ -323,19 +326,22 @@ class ProjectBrowserDialog(
         status.text = ""
         tree.emptyText.clear()
         tree.emptyText.text = PyProjectHubBundle["browser.empty.noRoots"]
-        for (suggested in PyProjectHubSettings.suggestedRoots()) {
+        offeredRoots = PyProjectHubSettings.suggestedRoots()
+        for (suggested in offeredRoots) {
             tree.emptyText.appendLine(
                 PyProjectHubBundle.message("browser.empty.addDefault", FileUtil.getLocationRelativeToUserHome(suggested.toString())),
                 SimpleTextAttributes.LINK_PLAIN_ATTRIBUTES,
-            ) {
-                settings.state.roots.add(suggested.toString())
-                startScan()
-            }
+            ) { addRoot(suggested) }
         }
         tree.emptyText.appendLine(PyProjectHubBundle["browser.empty.configure"], SimpleTextAttributes.LINK_PLAIN_ATTRIBUTES) {
             openSettings()
         }
         updateSelectionDependentState()
+    }
+
+    private fun addRoot(root: Path) {
+        settings.state.roots.add(root.toString())
+        startScan()
     }
 
     private fun openSettings() {
@@ -401,6 +407,13 @@ class ProjectBrowserDialog(
 
     @get:TestOnly
     internal val searchForTests: SearchTextField get() = search
+
+    @get:TestOnly
+    internal val offeredRootsForTests: List<Path> get() = offeredRoots
+
+    /** Does what clicking an offered folder's link does. */
+    @TestOnly
+    internal fun addOfferedRootForTests(root: Path) = addRoot(root)
 
     @get:TestOnly
     internal val pythonVersionsForTests: List<String?> get() = (0 until pythonCombo.itemCount).map(pythonCombo::getItemAt)

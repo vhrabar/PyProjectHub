@@ -60,9 +60,9 @@ class ProjectBrowserDialogTest : BasePlatformTestCase() {
         PlatformTestUtil.dispatchAllInvocationEventsInIdeEventQueue()
     }
 
-    private fun shownRows(): List<String> =
+    private fun shownRows(of: Tree = tree): List<String> =
         TreeUtil
-            .treeNodeTraverser(tree.model.root as DefaultMutableTreeNode)
+            .treeNodeTraverser(of.model.root as DefaultMutableTreeNode)
             .filter(DefaultMutableTreeNode::class.java)
             .mapNotNull { node ->
                 when (val value = node.userObject) {
@@ -105,6 +105,30 @@ class ProjectBrowserDialogTest : BasePlatformTestCase() {
 
         // Only member core declares requires-python (>=3.12)
         assertEquals(listOf(null, "3.12"), dialog.pythonVersionsForTests)
+    }
+
+    fun testFirstUseOffersExistingCommonFoldersAndAddingOneScansIt() {
+        val home = workDir.resolve("home")
+        write("home/src/tool", "[project]\nname = \"tool\"\n")
+        Files.createDirectories(home.resolve("code"))
+        val savedHome = System.getProperty("user.home")
+        System.setProperty("user.home", home.toString())
+        val settings = PyProjectHubSettings.getInstance()
+        settings.loadState(PyProjectHubSettings.State())
+        val firstUse = ProjectBrowserDialog(null)
+        try {
+            assertEquals(listOf(home.resolve("src"), home.resolve("code")), firstUse.offeredRootsForTests)
+
+            firstUse.addOfferedRootForTests(home.resolve("src"))
+            firstUse.awaitScanForTests()
+            PlatformTestUtil.dispatchAllInvocationEventsInIdeEventQueue()
+
+            assertEquals(listOf(home.resolve("src").toString()), settings.state.roots)
+            assertEquals(listOf("tool"), shownRows(firstUse.treeForTests))
+        } finally {
+            System.setProperty("user.home", savedHome)
+            firstUse.close(DialogWrapper.CANCEL_EXIT_CODE)
+        }
     }
 
     fun testSearchFiltersTheTree() {
