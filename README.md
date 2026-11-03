@@ -15,9 +15,22 @@ IDE Welcome screen, using the metadata in each project's `pyproject.toml`.
 - Groups uv workspaces: the root `pyproject.toml` with its member packages beneath it
 - Search by name, description, keywords, authors, dependencies or path; filter by tool and supported Python version; sort by name, modification time, last opened or path
 - Opens a workspace member through its workspace root, where `uv.lock` and the shared `.venv` live, or on its own if you prefer
+- A member opened on its own still uses the workspace's shared `.venv` as its interpreter, unless it already has one
 
 PyProjectHub is not affiliated with Astral or JetBrains.
 <!-- Plugin description end -->
+
+## Opening uv workspace members
+
+In a uv workspace, every member shares the `uv.lock` and `.venv` at the workspace root. When you select a member, you have two ways to open it:
+
+- **Open Workspace** (the default) opens the workspace root, so PyCharm finds the shared `.venv` on its own.
+- **Open Member Alone** opens just the member's folder. PyCharm wouldn't look for the `.venv` one level up, so PyProjectHub sets it as the project's interpreter:
+  - Only when the project has no interpreter yet. An interpreter you've already configured is never replaced.
+  - Only when the workspace root has a usable `.venv`, with a `pyvenv.cfg` and a working `bin/python` (`Scripts\python.exe` on Windows). If it doesn't, run `uv sync` in the workspace root first.
+  - A notification says which interpreter was set. Click **Undo** to remove it again.
+
+To turn this off, clear **Use the workspace .venv for members opened alone** in <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>PyProjectHub</kbd>.
 
 ## Installation
 
