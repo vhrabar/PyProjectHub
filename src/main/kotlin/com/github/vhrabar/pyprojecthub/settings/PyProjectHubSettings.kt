@@ -24,6 +24,9 @@ class PyProjectHubSettings : PersistentStateComponent<PyProjectHubSettings.State
         var skipHidden: Boolean = true
         var followSymlinks: Boolean = false
 
+        /** Whether a uv workspace member opened alone gets the workspace root's `.venv` as its interpreter. */
+        var useWorkspaceInterpreter: Boolean = true
+
         var query: String = ""
         var tool: String? = null
         var python: String? = null

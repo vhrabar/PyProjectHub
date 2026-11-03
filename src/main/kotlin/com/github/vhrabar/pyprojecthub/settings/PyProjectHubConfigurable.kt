@@ -25,6 +25,7 @@ class PyProjectHubConfigurable : Configurable {
     private val skipHidden = JBCheckBox(PyProjectHubBundle["settings.skipHidden"])
     private val followSymlinks = JBCheckBox(PyProjectHubBundle["settings.followSymlinks"])
     private val excludes = JBTextArea(6, 30)
+    private val useWorkspaceInterpreter = JBCheckBox(PyProjectHubBundle["settings.workspaceInterpreter"])
 
     override fun getDisplayName(): String = PyProjectHubBundle["settings.displayName"]
 
@@ -56,6 +57,11 @@ class PyProjectHubConfigurable : Configurable {
                         .comment(PyProjectHubBundle["settings.excludes.comment"])
                 }
             }
+            group(PyProjectHubBundle["settings.open.group"]) {
+                row {
+                    cell(useWorkspaceInterpreter).comment(PyProjectHubBundle["settings.workspaceInterpreter.comment"])
+                }
+            }
         }.also { reset() }
     }
 
@@ -81,6 +87,7 @@ class PyProjectHubConfigurable : Configurable {
             depth.number != state.maxDepth ||
             skipHidden.isSelected != state.skipHidden ||
             followSymlinks.isSelected != state.followSymlinks ||
+            useWorkspaceInterpreter.isSelected != state.useWorkspaceInterpreter ||
             editedExcludes() != state.excludes
     }
 
@@ -90,6 +97,7 @@ class PyProjectHubConfigurable : Configurable {
         state.maxDepth = depth.number
         state.skipHidden = skipHidden.isSelected
         state.followSymlinks = followSymlinks.isSelected
+        state.useWorkspaceInterpreter = useWorkspaceInterpreter.isSelected
         state.excludes = editedExcludes().toMutableList()
     }
 
@@ -99,6 +107,7 @@ class PyProjectHubConfigurable : Configurable {
         depth.number = state.maxDepth
         skipHidden.isSelected = state.skipHidden
         followSymlinks.isSelected = state.followSymlinks
+        useWorkspaceInterpreter.isSelected = state.useWorkspaceInterpreter
         excludes.text = state.excludes.joinToString("\n")
     }
 }

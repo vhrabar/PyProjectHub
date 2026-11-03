@@ -100,6 +100,32 @@ class ProjectBrowserDialogTest : BasePlatformTestCase() {
         assertFalse(dialog.isOpenMemberEnabledForTests)
     }
 
+    private fun workspaceVenv(): Path {
+        val bin = Files.createDirectories(workDir.resolve("mono/.venv/bin"))
+        Files.writeString(workDir.resolve("mono/.venv/pyvenv.cfg"), "")
+        return Files.writeString(bin.resolve("python"), "")
+    }
+
+    fun testOpenMemberAloneHandsOverTheWorkspaceInterpreter() {
+        val python = workspaceVenv()
+        awaitScan()
+
+        select("core")
+        assertEquals(python, dialog.memberAloneInterpreterForTests)
+
+        select("scraper")
+        assertNull(dialog.memberAloneInterpreterForTests)
+    }
+
+    fun testWorkspaceInterpreterCanBeTurnedOff() {
+        workspaceVenv()
+        PyProjectHubSettings.getInstance().state.useWorkspaceInterpreter = false
+        awaitScan()
+
+        select("core")
+        assertNull(dialog.memberAloneInterpreterForTests)
+    }
+
     fun testPythonFilterOffersDeclaredVersionsAfterScan() {
         awaitScan()
 

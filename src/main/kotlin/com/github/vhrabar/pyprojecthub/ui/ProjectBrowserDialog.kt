@@ -387,16 +387,26 @@ class ProjectBrowserDialog(
             startScan()
             return
         }
-        // A member opened alone doesn't see the workspace root's .venv, so hand it over explicitly
-        val workspaceInterpreter =
-            (node as? BrowserNode.Project)
-                ?.workspace
-                ?.takeIf { memberAlone }
-                ?.let { WorkspaceInterpreter.locate(target, it.project.dir) }
+        val workspaceInterpreter = workspaceInterpreterFor(node, memberAlone)
         settings.recordOpened(target)
         close(OK_EXIT_CODE)
         ProjectOpener.open(target, currentProject, workspaceInterpreter)
     }
+
+    /** A member opened alone doesn't see the workspace root's .venv, so it is handed over explicitly unless turned off. */
+    private fun workspaceInterpreterFor(
+        node: BrowserNode,
+        memberAlone: Boolean,
+    ): Path? {
+        if (!memberAlone || !settings.state.useWorkspaceInterpreter) return null
+        val member = node as? BrowserNode.Project ?: return null
+        val workspace = member.workspace ?: return null
+        return WorkspaceInterpreter.locate(member.project.dir, workspace.project.dir)
+    }
+
+    /** The interpreter Open Member Alone would hand to the opened project for the current selection. */
+    @get:TestOnly
+    internal val memberAloneInterpreterForTests: Path? get() = selectedNode()?.let { workspaceInterpreterFor(it, memberAlone = true) }
 
     @TestOnly
     internal fun awaitScanForTests() {

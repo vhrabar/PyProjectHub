@@ -49,6 +49,8 @@ class PyProjectHubPluginTest : BasePlatformTestCase() {
         }
     }
 
+    fun testWorkspaceInterpreterIsOnByDefault() = assertTrue(PyProjectHubSettings.State().useWorkspaceInterpreter)
+
     fun testDetailsEscapeUntrustedMetadata() {
         val root =
             PyProject(

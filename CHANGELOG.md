@@ -6,7 +6,7 @@
 
 ### Added
 
-- **Open Member Alone** now sets up the workspace's shared `.venv` as the member's interpreter when the project has none yet. A notification names the interpreter and offers **Undo**. An interpreter that's already configured is never replaced.
+- **Open Member Alone** now sets up the workspace's shared `.venv` as the member's interpreter when the project has none yet. A notification names the interpreter and offers **Undo**. An interpreter that's already configured is never replaced. Turn this off in **Settings | Tools | PyProjectHub**.
 
 ## [0.0.2] - 2026-11-01
 
