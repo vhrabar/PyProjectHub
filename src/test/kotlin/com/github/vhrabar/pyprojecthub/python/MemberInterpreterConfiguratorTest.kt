@@ -1,5 +1,11 @@
 package com.github.vhrabar.pyprojecthub.python
 
+import com.github.vhrabar.pyprojecthub.discovery.ProjectScanner
+import com.github.vhrabar.pyprojecthub.model.UvWorkspace
+import com.intellij.notification.Notification
+import com.intellij.notification.Notifications
+import com.intellij.openapi.actionSystem.DataContext
+import com.intellij.openapi.actionSystem.impl.SimpleDataContext
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.projectRoots.ProjectJdkTable
 import com.intellij.openapi.projectRoots.Sdk
@@ -56,6 +62,9 @@ class MemberInterpreterConfiguratorTest : BasePlatformTestCase() {
         return sdk
     }
 
+    /** Stands in for PyCharm's SDK creation, which needs interpreter introspection the headless test IDE lacks. */
+    private val createSdk: (Path) -> Sdk = { home -> registeredSdk("created", home) }
+
     fun testAKnownInterpreterIsReusedAndSetOnTheProject() {
         val sdk = registeredSdk("ws venv", interpreter)
         val applied = MemberInterpreterConfigurator.configure(project, interpreter)
@@ -103,5 +112,91 @@ class MemberInterpreterConfiguratorTest : BasePlatformTestCase() {
         MemberInterpreterConfigurator.undo(project, applied)
 
         assertSame(picked, ProjectRootManager.getInstance(project).projectSdk)
+    }
+
+    fun testAnUnknownInterpreterIsRegisteredAsANewSdk() {
+        val applied = MemberInterpreterConfigurator.configure(project, interpreter, createSdk)!!
+
+        assertTrue(applied.createdSdk)
+        assertEquals("created", applied.sdk.name)
+        assertEquals(interpreter, Path.of(applied.sdk.homePath!!))
+        assertSame(applied.sdk, ProjectRootManager.getInstance(project).projectSdk)
+    }
+
+    fun testUndoRemovesASdkItCreated() {
+        val applied = MemberInterpreterConfigurator.configure(project, interpreter, createSdk)!!
+
+        MemberInterpreterConfigurator.undo(project, applied)
+
+        assertNull(ProjectRootManager.getInstance(project).projectSdk)
+        assertFalse(applied.sdk in ProjectJdkTable.getInstance().allJdks)
+    }
+
+    fun testTheNotificationNamesTheInterpreterAndItsUndoWorks() {
+        val sdk = registeredSdk("ws venv", interpreter)
+        val shown = mutableListOf<Notification>()
+        project.messageBus.connect(testRootDisposable).subscribe(
+            Notifications.TOPIC,
+            object : Notifications {
+                override fun notify(notification: Notification) {
+                    shown += notification
+                }
+            },
+        )
+
+        MemberInterpreterConfigurator.configureAndNotify(project, interpreter)
+
+        val notification = shown.single()
+        assertTrue(notification.content.contains("ws venv"))
+        assertTrue(notification.content.contains(interpreter.toString()))
+        val undo = notification.actions.single()
+        assertEquals("Undo", undo.templatePresentation.text)
+
+        Notification.fire(notification, undo, SimpleDataContext.getSimpleContext(Notification.KEY, notification, DataContext.EMPTY_CONTEXT))
+
+        assertNull(ProjectRootManager.getInstance(project).projectSdk)
+        assertTrue(sdk in ProjectJdkTable.getInstance().allJdks)
+        assertTrue(notification.isExpired)
+    }
+
+    fun testAFailedSdkCreationChangesNothing() {
+        assertNull(MemberInterpreterConfigurator.configure(project, interpreter) { null })
+        assertNull(ProjectRootManager.getInstance(project).projectSdk)
+    }
+
+    fun testNoNotificationWhenNothingWasConfigured() {
+        val own = registeredSdk("own", workspace.resolve("own/bin/python"))
+        setProjectSdk(own)
+        var shown = 0
+        project.messageBus.connect(testRootDisposable).subscribe(
+            Notifications.TOPIC,
+            object : Notifications {
+                override fun notify(notification: Notification) {
+                    shown++
+                }
+            },
+        )
+
+        MemberInterpreterConfigurator.configureAndNotify(project, interpreter)
+
+        assertEquals(0, shown)
+    }
+
+    fun testAFixtureWorkspaceMemberGetsTheRootVenv() {
+        val fixture = Files.createDirectories(workspace.resolve("fixture"))
+        Path.of("src/test/testData/workspace").toFile().copyRecursively(fixture.toFile())
+        Files.writeString(Files.createDirectories(fixture.resolve(".venv/bin")).resolve("python"), "")
+        Files.writeString(fixture.resolve(".venv/pyvenv.cfg"), "")
+        val sdk = registeredSdk("mono venv", fixture.resolve(".venv/bin/python"))
+
+        val result = ProjectScanner().scan(listOf(fixture))
+        val mono = result.entries.filterIsInstance<UvWorkspace>().single()
+        val core = mono.members.single { it.name == "core" }
+        val python = WorkspaceInterpreter.locate(core.dir, mono.project.dir)
+        assertEquals(fixture.resolve(".venv/bin/python"), python)
+
+        val applied = MemberInterpreterConfigurator.configure(project, python!!)!!
+        assertSame(sdk, applied.sdk)
+        assertSame(sdk, ProjectRootManager.getInstance(project).projectSdk)
     }
 }

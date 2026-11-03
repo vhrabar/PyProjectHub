@@ -32,10 +32,15 @@ object MemberInterpreterConfigurator {
         val createdSdk: Boolean,
     )
 
-    /** Must run on the EDT. Returns null when the project already has an interpreter or the SDK couldn't be set up. */
+    /**
+     * Must run on the EDT. Returns null when the project already has an interpreter or the SDK couldn't be set up.
+     * [createSdk] registers an interpreter PyCharm doesn't know yet; tests replace it because the headless test
+     * IDE can't introspect interpreters.
+     */
     fun configure(
         project: Project,
         interpreter: Path,
+        createSdk: (Path) -> Sdk? = ::createAndAddSdk,
     ): Applied? {
         ApplicationManager.getApplication().assertIsDispatchThread()
         if (project.isDisposed || hasPythonInterpreter(project)) return null
@@ -43,7 +48,7 @@ object MemberInterpreterConfigurator {
         val existing = findSdk(interpreter)
         val sdk =
             existing
-                ?: SdkConfigurationUtil.createAndAddSDK(interpreter.toString(), PythonSdkType.getInstance())
+                ?: createSdk(interpreter)
                 ?: return null.also { thisLogger().warn("Could not create a Python SDK for $interpreter") }
         SdkConfigurationUtil.setDirectoryProjectSdk(project, sdk)
         return Applied(sdk, createdSdk = existing == null)
@@ -82,6 +87,9 @@ object MemberInterpreterConfigurator {
         }
         if (applied.createdSdk && !isUsedByOpenProjects(applied.sdk)) SdkConfigurationUtil.removeSdk(applied.sdk)
     }
+
+    private fun createAndAddSdk(interpreter: Path): Sdk? =
+        SdkConfigurationUtil.createAndAddSDK(interpreter.toString(), PythonSdkType.getInstance())
 
     private fun hasPythonInterpreter(project: Project): Boolean =
         ProjectRootManager.getInstance(project).projectSdk != null ||
