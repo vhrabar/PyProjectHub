@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+## [0.0.2] - 2026-11-01
+
+### Changed
+
+- On first use, the browser offers every common project folder in your home folder that exists (`PycharmProjects`, `Projects`, `projects`, `src`, `code`, `dev`, `repos`), not just `~/PycharmProjects`.
+- The **Python** filter lists the versions your projects declare in `requires-python` and Python version classifiers, instead of a fixed 3.9–3.14 list.
+
+### Fixed
+
+- Project folders starting with `~\` now expand to home folder, in the same manner as a `~/` already did.
+
 ## [0.0.1] - 2026-10-28
 
 ### Added
@@ -16,5 +27,6 @@
 - Search across names, descriptions, keywords, authors, dependencies and paths; filter by tool (uv, Poetry, PDM, Hatch, Flit, Maturin, setuptools) and by supported Python version; sort by name, last modified, recently opened or path. The browser remembers these choices.
 - Opening a workspace member opens its workspace root by default, so the shared `uv.lock` and `.venv` are used. **Open Member Alone** opens just the package.
 
-[Unreleased]: https://github.com/vhrabar/PyProjectHub/compare/0.0.1...HEAD
+[Unreleased]: https://github.com/vhrabar/PyProjectHub/compare/0.0.2...HEAD
+[0.0.2]: https://github.com/vhrabar/PyProjectHub/compare/0.0.1...0.0.2
 [0.0.1]: https://github.com/vhrabar/PyProjectHub/commits/0.0.1
