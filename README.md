@@ -7,7 +7,7 @@
 
 <!-- Plugin description -->
 **PyProjectHub** lets you browse, search and filter your Python projects and workspaces from the
-35577E Welcome screen, using the metadata in each project's `pyproject.toml`.
+IDE Welcome screen, using the metadata in each project's `pyproject.toml`.
 
 - Finds every `pyproject.toml` below the folders you choose, in the background
 - Shows name, version, description, authors, license, `requires-python`, build backend and dependencies
@@ -23,21 +23,21 @@ PyProjectHub is not affiliated with Astral or JetBrains.
 
 [![Install from JetBrains Marketplace](https://img.shields.io/badge/JetBrains%20Marketplace-Install-blue?logo=jetbrains&style=for-the-badge)](https://plugins.jetbrains.com/plugin/35577)
 
-- Using the 35577E built-in plugin system:
+- Using the IDE built-in plugin system:
 
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "IssueHub"</kbd> >
+  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "PyProjectHub"</kbd> >
   <kbd>Install</kbd>
 
 - Using JetBrains Marketplace:
 
-  Go to [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/35577) and install it by clicking the <kbd>Install to ...</kbd> button in case your 35577E is running.
+  Go to [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/35577) and install it by clicking the <kbd>Install to ...</kbd> button in case your IDE is running.
 
   You can also download the [latest release](https://plugins.jetbrains.com/plugin/35577/versions) from JetBrains Marketplace and install it manually using
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
 
 - Manually:
 
-  Download the [latest release](https://github.com/vhrabar/IssueHub/releases/latest) and install it manually using
+  Download the [latest release](https://github.com/vhrabar/PyProjectHub/releases/latest) and install it manually using
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
 
 ## LLM Usage Disclaimer
