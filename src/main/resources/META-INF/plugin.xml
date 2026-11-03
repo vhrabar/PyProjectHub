@@ -16,6 +16,7 @@
             parentId="tools"
             instance="com.github.vhrabar.pyprojecthub.settings.PyProjectHubConfigurable"
             key="settings.displayName"/>
+        <notificationGroup id="PyProjectHub" displayType="BALLOON" key="notification.group"/>
     </extensions>
 
     <actions resource-bundle="messages.PyProjectHubBundle">

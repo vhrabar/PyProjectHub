@@ -8,6 +8,7 @@ import com.github.vhrabar.pyprojecthub.filter.ProjectFilter
 import com.github.vhrabar.pyprojecthub.filter.SortOrder
 import com.github.vhrabar.pyprojecthub.model.PythonTool
 import com.github.vhrabar.pyprojecthub.model.ScanResult
+import com.github.vhrabar.pyprojecthub.python.WorkspaceInterpreter
 import com.github.vhrabar.pyprojecthub.settings.PyProjectHubConfigurable
 import com.github.vhrabar.pyprojecthub.settings.PyProjectHubSettings
 import com.intellij.openapi.application.ApplicationManager
@@ -386,9 +387,15 @@ class ProjectBrowserDialog(
             startScan()
             return
         }
+        // A member opened alone doesn't see the workspace root's .venv, so hand it over explicitly
+        val workspaceInterpreter =
+            (node as? BrowserNode.Project)
+                ?.workspace
+                ?.takeIf { memberAlone }
+                ?.let { WorkspaceInterpreter.locate(target, it.project.dir) }
         settings.recordOpened(target)
         close(OK_EXIT_CODE)
-        ProjectOpener.open(target, currentProject)
+        ProjectOpener.open(target, currentProject, workspaceInterpreter)
     }
 
     @TestOnly
